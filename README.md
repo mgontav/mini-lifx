@@ -17,10 +17,16 @@ pip install pyserial
 
 Running
 -
-``` socat PTY,link=tty_trinket PTY,link=tty_terminal ```
+```
+socat PTY,link=tty_trinket PTY,link=tty_terminal
+```
 
-``` node client.js ```
+```
+node client.js
+```
 
-``` python TrinketFakeUsbSerialHostSW.py -v -p tty_trinket ```
+```
+python TrinketFakeUsbSerialHostSW.py -v -p tty_trinket
+```
 
 Plug in your Trinket with `mini_lifx_trinket` (needs libraries) loaded and go.
