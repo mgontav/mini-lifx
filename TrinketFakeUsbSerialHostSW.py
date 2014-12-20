@@ -74,7 +74,9 @@ def main(argv):
 
         endpoint = 0x81
         if trinketHandle != False:
-            endpoint = trinketHandle[0][(0,0)][0] # the first endpoint should be the only endpoint, it should be an interrupt-in endpoint
+            cfg = trinketHandle.get_active_configuration()
+            intf = cfg[(0,0)]
+            endpoint = intf[0]
 
         while trinketHandle != False:
             time.sleep(0.01) # don't hog all CPU
@@ -84,8 +86,8 @@ def main(argv):
                 data = ser.read(min(avail, 8))
                 try:
                     ret = trinketHandle.ctrl_transfer(0x43, 0x01, 0x00, 0x00, map(ord, data))
-                    thisMsg = 'Sent to Trinket'
-                    if verbose and thisMsg != lastMsg:
+                    thisMsg = 'Sent to Trinket: ' + str(data)
+                    if verbose:
                         print thisMsg
                         lastMsg = thisMsg
                 except Exception as ex:
@@ -101,7 +103,7 @@ def main(argv):
                 data = trinketHandle.read(endpoint.bEndpointAddress, endpoint.wMaxPacketSize)
                 readCnt = len(data)
                 if readCnt > 0:
-                    thisMsg = 'Read from Trinket'
+                    thisMsg = 'Read from Trinket: ' + str(data)
                     if verbose and thisMsg != lastMsg:
                         print thisMsg
                         lastMsg = thisMsg
@@ -114,7 +116,7 @@ def main(argv):
 
             except Exception as ex:
                 exStr = str(ex).lower()
-                if 'timeout' not in exStr: # ignore timeout errors, but all other errors signifies that the device disconnected
+                if 'timed out' not in exStr: # ignore timeout errors, but all other errors signifies that the device disconnected
                     if silent == False:
                         print 'USB read error: ', ex
                     time.sleep(0.1) # don't hog all CPU
@@ -133,7 +135,13 @@ def findTrinket():
     if device == None or device == False or device == 0 :
         time.sleep(0.1) # don't hog all CPU
         return False
-    device.set_configuration()
+    while True:
+        try:
+            device.set_configuration()
+            break
+        except:
+            time.sleep(0.01)
+    print device
     return device
 
 def printHelp():
